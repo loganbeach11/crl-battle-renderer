@@ -173,7 +173,7 @@ def post_discord(file_path, event):
     message = {
         'content': (
             f"**{wins} wins** — "
-            f"{safe(player_name)} ({safe(player_clan)}) defeated "
+            f"{safe(player_name)} ({safe(player_clan)}) vs "
             f"{safe(opponent_name)} ({safe(opponent_clan)}) "
             f"{crowns_for}-{crowns_against}"
         ),
