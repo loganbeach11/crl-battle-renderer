@@ -123,7 +123,7 @@ def make_image(event):
     draw.text((W//2, 54), 'CRL 20-WIN CHALLENGE', anchor='mt', font=font(80), fill=WHITE, stroke_width=1)
     draw.text((W//2, 166), f'{milestone} WINS', anchor='mt', font=font(88), fill=GOLD, stroke_width=2, stroke_fill=(95, 63, 12))
     result = f"{event.get('crownsFor', 0)}  -  {event.get('crownsAgainst', 0)}"
-    draw.text((W//2, 307), result, anchor='mt', font=font(79), fill=WHITE)
+    draw.text((W//2, 270), result, anchor='mt', font=font(79), fill=WHITE)
     draw.rounded_rectangle((46,56,334,132), radius=16, fill=(19, 122, 98))
     draw.text((190,92),'VICTORY',anchor='mm',font=font(41),fill=WHITE)
     draw.line([(60, 375),(1110,375)], fill=CYAN, width=8)
