@@ -43,9 +43,29 @@ def fit_text(draw, text, size, max_width, min_size=24):
     return text, font(size)
 
 
-def image_url(card):
+def card_art_info(card):
+    """Select artwork for the actual equipped form, not merely available forms."""
     urls = card.get('iconUrls') or {}
-    return urls.get('evolutionMedium') if card.get('evolutionLevel') and urls.get('evolutionMedium') else urls.get('medium', '')
+    try:
+        form = int(card.get('evolutionLevel') or 0)
+    except (TypeError, ValueError):
+        form = 0
+
+    # In current battle payloads: 1 = Evolution, 2 = Hero.
+    # For unexpected higher values, prefer Hero if present.
+    if form >= 2:
+        if urls.get('heroMedium'):
+            return urls['heroMedium'], 'HERO', False
+        return urls.get('medium', ''), 'HERO', True
+    if form == 1:
+        if urls.get('evolutionMedium'):
+            return urls['evolutionMedium'], 'EVO', False
+        return urls.get('medium', ''), 'EVO', True
+    return urls.get('medium', ''), '', False
+
+
+def image_url(card):
+    return card_art_info(card)[0]
 
 
 def fetch_art(url):
@@ -61,15 +81,28 @@ def fetch_art(url):
 
 
 def card_slot(canvas, draw, card, x, y, width=220, height=273):
-    draw.rounded_rectangle((x - 4, y - 4, x + width + 4, y + height + 4), radius=15, fill=(36, 54, 79), outline=(69, 94, 129), width=3)
-    pic = fetch_art(image_url(card))
+    url, form, fallback = card_art_info(card)
+    # A gentle inset + modest border lets ornate Evo/Hero outlines stand out.
+    draw.rounded_rectangle((x-3, y-3, x+width+3, y+height+3), radius=17,
+                           fill=(25, 43, 70), outline=(57, 87, 126), width=2)
+    pic = fetch_art(url)
     if pic:
-        # Card images have differing aspect ratios; contain rather than distort.
-        pic.thumbnail((width, height), Image.Resampling.LANCZOS)
-        canvas.alpha_composite(pic, (int(x + (width-pic.width)/2), int(y + (height-pic.height)/2)))
+        pic.thumbnail((width-8, height-8), Image.Resampling.LANCZOS)
+        canvas.alpha_composite(pic, (int(x+(width-pic.width)/2), int(y+(height-pic.height)/2)))
     else:
-        name, f = fit_text(draw, card.get('name', '?'), 24, width - 18, 18)
-        draw.text((x + width/2, y + height/2), name, anchor='mm', font=f, fill=WHITE)
+        name, f = fit_text(draw, card.get('name', '?'), 24, width-18, 18)
+        draw.text((x + width/2, y + height/2), name,
+                  anchor='mm', font=f, fill=WHITE)
+
+    # Clearly mark Hero/Evo even when upstream API omits the special art.
+    if fallback and form:
+        color = GOLD if form == 'HERO' else MAGENTA
+        bx1, by1 = x + 9, y + 7
+        bx2, by2 = bx1 + (107 if form == 'HERO' else 82), by1 + 36
+        draw.rounded_rectangle((bx1, by1, bx2, by2), radius=11, fill=(10, 19, 34),
+                               outline=color, width=2)
+        draw.text(((bx1+bx2)/2, (by1+by2)/2), form,
+                  anchor='mm', font=font(22), fill=color)
 
 
 def make_image(event):
@@ -103,13 +136,13 @@ def make_image(event):
         clan = (p.get('clan') or {}).get('name') or 'No clan'
         clan, cf = fit_text(draw, clan, 39, 1040, 22)
         draw.text((x, 520), clan, font=cf, fill=color)
-        draw.rounded_rectangle((x-12, 585, x+1062, 1068), radius=30, fill=(20, 34, 57, 235), outline=(45, 67, 98), width=3)
+        draw.rounded_rectangle((x-12, 585, x+1062, 1068), radius=30, fill=(17, 31, 54, 235), outline=(42, 71, 105), width=2)
         cards = p.get('cards') or []
         for idx, card in enumerate(cards[:8]):
             # 4 columns, 2 rows, 220px art cards; 3x screenshot size.
-            cx = x + 20 + (idx % 4)*257
-            cy = 613 + (idx // 4)*224
-            card_slot(canvas, draw, card, cx, cy, 207, 193)
+            cx = x + 24 + (idx % 4)*257
+            cy = 606 + (idx // 4)*230
+            card_slot(canvas, draw, card, cx, cy, 218, 206)
     return canvas.convert('RGB')
 
 
