@@ -183,8 +183,8 @@ def main():
         # Manual workflow_dispatch is only a connectivity check, no fake battle posted.
         print('No battle payload: run via Apps Script dispatch to render a real match.')
         return
-    if int(event.get('milestone', 0)) not in [17,18,19,20]:
-        raise ValueError('Only 17–20 win milestones supported')
+    if int(event.get('milestone', 0)) not in [15,16,17,18,19,20]:
+        raise ValueError('Only 15–20 win milestones supported')
     img = make_image(event)
     name = re.sub(r'[^A-Za-z0-9_-]', '_', str(event.get('milestone', 'win')))
     dst = OUTPUT / f'crl_{name}_wins.png'
