@@ -152,7 +152,34 @@ def post_discord(file_path, event):
         print('No webhook secret: preview only.')
         return
     # Don't echo player names into GitHub Actions logs; send title within attachment instead.
-    message = {'content': f"**CRL 20-Win Challenge — {event['milestone']} wins**", 'allowed_mentions': {'parse': []}}
+    
+    player = event.get('player') or {}
+    opponent = event.get('opponent') or {}
+
+    player_name = player.get('name') or 'Unknown'
+    player_clan = (player.get('clan') or {}).get('name') or 'No clan'
+
+    opponent_name = opponent.get('name') or 'Unknown'
+    opponent_clan = (opponent.get('clan') or {}).get('name') or 'No clan'
+
+    crowns_for = event.get('crownsFor', 0)
+    crowns_against = event.get('crownsAgainst', 0)
+    wins = event.get('milestone', 0)
+
+    # Escape Discord Markdown in user-controlled player and clan names.
+    def safe(text):
+        return re.sub(r'([\\`*_~|>\[\]()])', r'\\\1', str(text))
+
+    message = {
+        'content': (
+            f"**{wins} wins** — "
+            f"{safe(player_name)} ({safe(player_clan)}) defeated "
+            f"{safe(opponent_name)} ({safe(opponent_clan)}) "
+            f"{crowns_for}-{crowns_against}"
+        ),
+        'allowed_mentions': {'parse': []}
+    }
+
     for attempt in range(1, 4):
         with open(file_path, 'rb') as f:
             res = requests.post(hook, data={'payload_json': json.dumps(message)}, files={'files[0]': (file_path.name, f, 'image/png')}, timeout=35)
