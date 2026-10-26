@@ -121,28 +121,29 @@ def make_image(event):
     draw = ImageDraw.Draw(canvas)
     draw.rectangle((0,0,W,11), fill=GOLD)
     draw.text((W//2, 54), 'CRL 20-WIN CHALLENGE', anchor='mt', font=font(80), fill=WHITE, stroke_width=1)
-    draw.text((W//2, 166), f'{milestone} WINS', anchor='mt', font=font(112), fill=GOLD, stroke_width=2, stroke_fill=(95, 63, 12))
+    draw.text((W//2, 166), f'{milestone} WINS', anchor='mt', font=font(88), fill=GOLD, stroke_width=2, stroke_fill=(95, 63, 12))
     result = f"{event.get('crownsFor', 0)}  -  {event.get('crownsAgainst', 0)}"
     draw.text((W//2, 307), result, anchor='mt', font=font(79), fill=WHITE)
     draw.rounded_rectangle((46,56,334,132), radius=16, fill=(19, 122, 98))
     draw.text((190,92),'VICTORY',anchor='mm',font=font(41),fill=WHITE)
-    draw.line([(60, 408),(1110,408)], fill=CYAN, width=8)
-    draw.line([(1290,408),(2340,408)], fill=MAGENTA, width=8)
+    draw.line([(60, 375),(1110,375)], fill=CYAN, width=8)
+    draw.line([(1290,375),(2340,375)], fill=MAGENTA, width=8)
     # Two name areas.
     for side, p, color in [('left', player, CYAN), ('right', opponent, MAGENTA)]:
         x = 64 if side == 'left' else 1274
         name, f = fit_text(draw, p.get('name') or 'Unknown', 60, 1040)
-        draw.text((x, 439), name, font=f, fill=WHITE)
+        draw.text((x, 400), name, font=f, fill=WHITE)
         clan = (p.get('clan') or {}).get('name') or 'No clan'
         clan, cf = fit_text(draw, clan, 39, 1040, 22)
-        draw.text((x, 520), clan, font=cf, fill=color)
-        draw.rounded_rectangle((x-12, 585, x+1062, 1068), radius=30, fill=(17, 31, 54, 235), outline=(42, 71, 105), width=2)
+        draw.text((x, 477), clan, font=cf, fill=color)
+        draw.rounded_rectangle((x-12, 535, x+1062, 1068), radius=30, fill=(17, 31, 54, 235), outline=(42, 71, 105), width=2)
         cards = p.get('cards') or []
         for idx, card in enumerate(cards[:8]):
             # 4 columns, 2 rows, 220px art cards; 3x screenshot size.
-            cx = x + 24 + (idx % 4)*257
-            cy = 606 + (idx // 4)*230
-            card_slot(canvas, draw, card, cx, cy, 218, 206)
+            cx = x + 16 + (idx % 4) * 258
+            cy = 557 + (idx // 4) * 249
+            card_slot(canvas, draw, card, cx, cy, 242, 230)
+
     return canvas.convert('RGB')
 
 
